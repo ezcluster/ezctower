@@ -14,6 +14,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -142,4 +143,30 @@ func (r *GitRepo) Push() error {
 	return r.repo.Push(&git.PushOptions{
 		Auth: r.auth,
 	})
+}
+
+func (r *GitRepo) GetLastHashLog(path string) (string, error) {
+	ref, err := r.repo.Head()
+	if err != nil {
+		return "", err
+	}
+	r.log.V(1).Info("log()", "path", path)
+
+	iter, err := r.repo.Log(&git.LogOptions{
+		From:  ref.Hash(),
+		Order: git.LogOrderCommitterTime,
+		PathFilter: func(p string) bool {
+			return strings.HasPrefix(p, path)
+		},
+		Since: &time.Time{},
+		All:   true,
+	})
+	if err != nil {
+		return "", err
+	}
+	commit, err := iter.Next()
+	if err != nil {
+		return "", err
+	}
+	return commit.Hash.String(), nil
 }

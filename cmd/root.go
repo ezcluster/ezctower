@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"ezcluster/tower/internal/config"
 	"ezcluster/tower/internal/gitrepo"
 	"fmt"
@@ -14,12 +13,12 @@ var GitRepo *gitrepo.GitRepo
 var rootCmd = &cobra.Command{
 	Use:   "tower",
 	Short: "A tool aimed to automate ezcluster deployment",
-	Run: func(cmd *cobra.Command, args []string) {
-		config.Log.V(0).Info("Log V0")
-		config.Log.V(1).Info("Log V1")
-		config.Log.V(2).Info("Log V2")
-		config.Log.Error(errors.New("just to test error message"), "Test ERROR")
-	},
+	//Run: func(cmd *cobra.Command, args []string) {
+	//	config.Log.V(0).Info("Log V0")
+	//	config.Log.V(1).Info("Log V1")
+	//	config.Log.V(2).Info("Log V2")
+	//	config.Log.Error(errors.New("just to test error message"), "Test ERROR")
+	//},
 }
 
 func init() {

@@ -4,6 +4,10 @@ import (
 	"github.com/go-logr/logr"
 )
 
+const (
+	Marker = ".marker"
+)
+
 var (
 	Conf Config
 	Log  logr.Logger
