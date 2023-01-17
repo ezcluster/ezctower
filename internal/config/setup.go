@@ -30,11 +30,11 @@ func Setup() error {
 	if configFile == "" {
 		Conf = Config{}
 	} else {
-		fn, err := filepath.Abs(configFile)
+		absConfigFile, err := filepath.Abs(configFile)
 		if err != nil {
 			return err
 		}
-		file, err := os.Open(fn)
+		file, err := os.Open(absConfigFile)
 		if err != nil {
 			return err
 		}
@@ -42,6 +42,10 @@ func Setup() error {
 		decoder.KnownFields(true)
 		if err = decoder.Decode(&Conf); err != nil {
 			return fmt.Errorf("file '%s': %w", configFile, err)
+		}
+		// Adjust workdir to configFile path if not absolute
+		if !filepath.IsAbs(Conf.Workdir) {
+			Conf.Workdir = filepath.Join(filepath.Dir(absConfigFile), Conf.Workdir)
 		}
 	}
 	// ---------------------- Combine with environment variable (Which take precedence)

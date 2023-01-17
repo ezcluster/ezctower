@@ -14,8 +14,14 @@ type LogConfig struct {
 	Mode  string `yaml:"mode"`
 }
 
+type Auth struct {
+	Username string `yaml:"username"`
+	Token    string `yaml:"token"`
+}
+
 type Config struct {
 	Log     LogConfig `yaml:"log"`
+	Auth    Auth      `yaml:"auth"`
 	Workdir string    `yaml:"workdir"`
 	Repo    string    `yaml:"repo"`
 	Branch  string    `yaml:"branch"`
