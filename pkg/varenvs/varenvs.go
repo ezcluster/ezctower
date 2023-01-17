@@ -46,6 +46,10 @@ func (v *Varenvs) Parse() error {
 				*ve.varp = v
 			}
 		}
+		// Handle default values
+		if *ve.varp == "" && ve.defaultValue != "" {
+			*ve.varp = ve.defaultValue
+		}
 		// Now, we are set. Check required error
 		if ve.required && *ve.varp == "" {
 			missings = append(missings, &v.varenvs[idx])

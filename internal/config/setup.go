@@ -54,6 +54,11 @@ func Setup() error {
 	varenv.Add("repo", &Conf.Repo, "EZCT_REPO", "", true, false)
 	varenv.Add("branch", &Conf.Branch, "EZCT_BRANCH", "", true, false)
 	varenv.Add("path", &Conf.Path, "EZCT_PATH", "", true, false)
+	varenv.Add("user", &Conf.Auth.Username, "EZCT_USERNAME", "", false, false)
+	varenv.Add("token", &Conf.Auth.Token, "EZCT_TOKEN", "", false, false)
+	varenv.Add("committerName", &Conf.Committer.Name, "EZCT_COMMITTER_NAME", "ezctower", false, false)
+	varenv.Add("committerEmail", &Conf.Committer.Email, "EZCT_COMMITTER_EMAIL", "tower@ezcluster.com", false, false)
+
 	err := varenv.Parse()
 	if err != nil {
 		return err
