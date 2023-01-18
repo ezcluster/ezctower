@@ -29,6 +29,10 @@ func refresh() error {
 	if err != nil {
 		return err
 	}
+	return refresh2(gr)
+}
+
+func refresh2(gr *gitrepo.GitRepo) error {
 	b, err := gr.Pull()
 	if err != nil {
 		return err
