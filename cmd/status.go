@@ -47,6 +47,14 @@ func status() (clean bool, err error) {
 			return false, err
 		}
 	}
+	absPath := gr.AbsPath(config.Conf.Path)
+	_, err = os.Stat(filepath.Join(absPath, config.Marker))
+	if err != nil {
+		config.Log.V(1).Info("marker not set", "path", config.Conf.Path, "error", err.Error())
+		// .marker does not exists. Let's say it is dirty, as never makasclean-ed
+		return false, nil
+	}
+
 	hash1, err := gr.GetLastHashLog(config.Conf.Path)
 	if err != nil {
 		return false, err

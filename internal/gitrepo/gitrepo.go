@@ -89,13 +89,13 @@ func (r *GitRepo) Pull() (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("unable to retrieve Worktree(): %w", err)
 	}
-	r.log.V(1).Info("pull repo")
+	r.log.V(1).Info("pull repo", "branch", r.branch)
 	err = w.Pull(&git.PullOptions{
 		RemoteName:    "origin",
 		Progress:      r.progress,
 		Auth:          r.auth,
 		SingleBranch:  true,
-		ReferenceName: plumbing.NewBranchReferenceName(config.Conf.Branch),
+		ReferenceName: plumbing.NewBranchReferenceName(r.branch),
 	})
 	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
 		return false, err
@@ -139,7 +139,7 @@ func (r *GitRepo) Commit(message string) error {
 }
 
 func (r *GitRepo) Push() error {
-	r.log.V(1).Info("Push")
+	r.log.V(1).Info("Push", "branch", r.branch)
 	return r.repo.Push(&git.PushOptions{
 		Auth: r.auth,
 	})
