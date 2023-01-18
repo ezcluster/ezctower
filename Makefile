@@ -15,7 +15,7 @@ BUILDX_CACHE=/tmp/docker_cache
 DOCKER_BUILD := docker build
 
 # Comment this to just build locally
-#DOCKER_PUSH := --push
+DOCKER_PUSH := --push
 
 # To authenticate for pushing in github repo:
 # echo $GITHUB_TOKEN | docker login ghcr.io -u $USER_NAME --password-stdin

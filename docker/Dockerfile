@@ -30,8 +30,7 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends \
         git \
         python3 \
-        python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+        python3-pip
 
 RUN mkdir /home/tower && groupadd -g 200 tower &&  useradd --uid 200 -g tower --shell /bin/bash tower && chown -R tower:tower /home/tower
 
@@ -41,7 +40,30 @@ RUN  pip install --upgrade pip && pip install -r /home/tower/requirements.txt
 
 COPY docker/.profile /home/tower/.profile
 
+# TODO: Merge with below
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends \
+        curl \
+        wget \
+        iputils-ping \
+        ncat \
+        iotop \
+        iftop \
+        mlocate \
+        net-tools \
+        sudo \
+        unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -L https://github.com/tsl0922/ttyd/releases/download/1.7.3/ttyd.i686 -o /usr/local/bin/ttyd && chmod +x /usr/local/bin/ttyd
+
+COPY docker/tower.sudoer /etc/sudoers.d/tower
+
+RUN cd /tmp && wget https://releases.hashicorp.com/terraform/1.3.7/terraform_1.3.7_linux_amd64.zip && \
+    unzip terraform_1.3.7_linux_amd64.zip && mv /tmp/terraform /usr/local/bin/terraform
+
 USER 200:200
 
 #ENTRYPOINT ["xx"]
-CMD ["echo", "Please, provide some commands"]
+CMD ["ttyd", "-d", "4", "-p", "7681", "/bin/bash", "-l"]
+
