@@ -16,7 +16,6 @@ var refreshCmd = &cobra.Command{
 	Use:   "refresh",
 	Short: "Pull latest version from git server",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Refresh")
 		if err := refresh(); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "Error on refresh: %v\n", err)
 			os.Exit(2)
@@ -38,9 +37,9 @@ func refresh2(gr *gitrepo.GitRepo) error {
 		return err
 	}
 	if b {
-		config.Log.Info("repo was updated")
+		config.Log.V(1).Info("repo was updated")
 	} else {
-		config.Log.Info("repo was up-to-date")
+		config.Log.V(1).Info("repo was up-to-date")
 	}
 	return nil
 }

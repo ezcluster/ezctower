@@ -5,17 +5,16 @@ DOCKER_IMAGE := ghcr.io/ezcluster/tower
 
 VERSION := 0.1.0
 
+KUBESPRAY_VERSION := v2.18.1
+
 DOCKER_TAG := $(VERSION)
 
 BUILDX_CACHE=/tmp/docker_cache
 
-# You can switch between simple (faster) docker build or multiplatform one.
-# For multiplatform build on a fresh system, do 'make docker-set-multiplatform-builder'
-#DOCKER_BUILD := docker buildx build --builder multiplatform --cache-to type=local,dest=$(BUILDX_CACHE),mode=max --cache-from type=local,src=$(BUILDX_CACHE) --platform linux/amd64,linux/arm64
 DOCKER_BUILD := docker build
 
 # Comment this to just build locally
-#DOCKER_PUSH := --push
+DOCKER_PUSH := --push
 
 # To authenticate for pushing in github repo:
 # echo $GITHUB_TOKEN | docker login ghcr.io -u $USER_NAME --password-stdin
@@ -30,10 +29,4 @@ version: ## Adjust version
 
 .PHONY: docker
 docker: ## Build and push tower imahe
-	$(DOCKER_BUILD) ${DOCKER_PUSH}  -t $(DOCKER_IMAGE):$(DOCKER_TAG) -f ./docker/Dockerfile .
-
-# ----------------------------------------------------------------------Docker local config
-
-.PHONY: docker-set-multiplatform-builder
-docker-set-multiplatform-builder:  ## TO EXECUTE ONCE ON build system, to allow multiplatform build with cache
-	docker buildx create --name multiplatform --driver docker-container
+	$(DOCKER_BUILD) ${DOCKER_PUSH}  --build-arg kubespray_version=${KUBESPRAY_VERSION} -t $(DOCKER_IMAGE):$(DOCKER_TAG) -f ./docker/Dockerfile .

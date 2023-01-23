@@ -1,27 +1,27 @@
 # Build the manager binary
-FROM  --platform=$BUILDPLATFORM golang:1.19 as builder
-ARG TARGETOS
-ARG TARGETARCH
-
+FROM golang:1.19 as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
-COPY ../go.mod go.mod
-COPY ../go.sum go.sum
+COPY ./go.mod go.mod
+COPY ./go.sum go.sum
 # cache deps before building and copying source so that we don't need to re-download as much
 # and so that source changes don't invalidate our downloaded layer
 RUN go mod download
 
 # Copy the go source
-COPY ../main.go main.go
-COPY ../cmd cmd/
-COPY ../internal internal/
-COPY ../pkg pkg/
+COPY ./main.go main.go
+COPY ./internal internal/
+COPY ./cmd cmd/
+COPY ./pkg pkg/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -a -o tower main.go
+RUN CGO_ENABLED=0 go build -a -o tower main.go
 
 FROM ubuntu:focal-20221130
+
+ARG kubespray_version
+
 WORKDIR /
 COPY --from=builder /workspace/tower /usr/local/bin/tower
 
@@ -42,6 +42,8 @@ RUN apt-get update \
         net-tools \
         sudo \
         unzip \
+        vim \
+        openssh-client \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /home/tower && groupadd -g 200 tower &&  useradd --uid 200 -g tower --shell /bin/bash tower && chown -R tower:tower /home/tower
@@ -60,13 +62,14 @@ COPY docker/.profile /home/tower/.profile
 
 
 RUN mkdir -p /home/tower/ezc && cd /home/tower/ezc && \
-    git clone --branch substenv --single-branch https://github.com/ezcluster/ezcluster.git && \
+    git clone https://github.com/ezcluster/ezcluster.git && \
     git clone https://github.com/ezcluster/ezcbase.git && \
     git clone https://github.com/ezcluster/ezcmiddle.git && \
     git clone https://github.com/ezcluster/ezck8s.git
 
 RUN mkdir -p /home/tower/nih && cd /home/tower/nih && \
-    git clone -b 'v2.18.1' --single-branch --depth 1 https://github.com/kubernetes-sigs/kubespray.git
+    git clone -b ${kubespray_version} --single-branch --depth 1 https://github.com/kubernetes-sigs/kubespray.git && \
+    mv kubespray kubespray-${kubespray_version}
 
 USER 200:200
 

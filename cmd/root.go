@@ -2,13 +2,10 @@ package cmd
 
 import (
 	"ezcluster/tower/internal/config"
-	"ezcluster/tower/internal/gitrepo"
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
 )
-
-var GitRepo *gitrepo.GitRepo
 
 var rootCmd = &cobra.Command{
 	Use:   "tower",

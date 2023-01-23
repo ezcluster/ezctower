@@ -10,9 +10,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp/sideband"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-logr/logr"
-	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -41,17 +39,13 @@ func New(progress sideband.Progress) (*GitRepo, error) {
 			Password: config.Conf.Auth.Token,
 		}
 	}
-	repoName, err := extractRepoName(config.Conf.Repo)
-	if err != nil {
-		return nil, err
-	}
-	gitRepo.repoPath = filepath.Join(config.Conf.Workdir, repoName)
+	gitRepo.repoPath = config.Conf.RepoBasePath
 	info, err := os.Stat(gitRepo.repoPath)
 	if err != nil {
-		gitRepo.log.V(1).Info("Clone repo", "url", config.Conf.Repo, "location", gitRepo.repoPath, "branch", config.Conf.Branch)
+		gitRepo.log.V(1).Info("Clone repo", "url", config.Conf.RepoUrl, "location", gitRepo.repoPath, "branch", config.Conf.Branch)
 		// repo does not exists. Must clone
 		cloneOptions := &git.CloneOptions{
-			URL:           config.Conf.Repo,
+			URL:           config.Conf.RepoUrl,
 			SingleBranch:  true,
 			ReferenceName: plumbing.NewBranchReferenceName(config.Conf.Branch),
 			Progress:      gitRepo.progress,
@@ -72,15 +66,6 @@ func New(progress sideband.Progress) (*GitRepo, error) {
 		}
 	}
 	return gitRepo, nil
-}
-
-func extractRepoName(s string) (string, error) {
-	u, err := url.Parse(s)
-	if err != nil {
-		return "", err
-	}
-	base := path.Base(u.Path)
-	return base[0 : len(base)-4], nil
 }
 
 // Pull return a flag true if the pull was effective. false if the local repo was already up to date

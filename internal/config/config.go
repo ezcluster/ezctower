@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	Marker = ".marker"
+	Marker = ".ezctmarker"
 )
 
 var (
@@ -29,11 +29,13 @@ type Auth struct {
 }
 
 type Config struct {
-	Log       LogConfig `yaml:"log"`
-	Auth      Auth      `yaml:"auth"`
-	Workdir   string    `yaml:"workdir"`
-	Repo      string    `yaml:"repo"`
-	Branch    string    `yaml:"branch"`
-	Path      string    `yaml:"path"`
-	Committer Committer `yaml:"committer"`
+	Log          LogConfig `yaml:"log"`
+	Auth         Auth      `yaml:"auth"`
+	Workdir      string    `yaml:"workdir"`
+	RepoUrl      string    `yaml:"repo"` // The git repo URL
+	Branch       string    `yaml:"branch"`
+	LocalPath    string    `yaml:"path"` // The current path, relative to RepoBasePath
+	Committer    Committer `yaml:"committer"`
+	RepoName     string    // Computed
+	RepoBasePath string    // Computed. RepoBasePath repo location (workdir + repo name)
 }

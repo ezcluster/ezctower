@@ -8,7 +8,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -17,12 +19,14 @@ var (
 	configFile string
 	logLevel   string
 	logMode    string
+	localPath  string
 )
 
 func InitConfig(rootCmd *cobra.Command) {
 	rootCmd.PersistentFlags().StringVar(&configFile, "configFile", "", "Configuration file")
 	rootCmd.PersistentFlags().StringVar(&logLevel, "logLevel", "", "Log level (PANIC|FATAL|ERROR|WARN|INFO|DEBUG|TRACE)")
 	rootCmd.PersistentFlags().StringVar(&logMode, "logMode", "", "Log mode: 'dev' or 'json'")
+	rootCmd.PersistentFlags().StringVar(&localPath, "localPath", "", "Local path")
 }
 
 func Setup() error {
@@ -51,9 +55,9 @@ func Setup() error {
 	// ---------------------- Combine with environment variable (Which take precedence)
 	varenv := varenvs.New()
 	varenv.Add("workdir", &Conf.Workdir, "EZCT_WORKDIR", "", true, false)
-	varenv.Add("repo", &Conf.Repo, "EZCT_REPO", "", true, false)
+	varenv.Add("repo", &Conf.RepoUrl, "EZCT_REPO", "", true, false)
 	varenv.Add("branch", &Conf.Branch, "EZCT_BRANCH", "", true, false)
-	varenv.Add("path", &Conf.Path, "EZCT_PATH", "", true, false)
+	varenv.Add("path", &Conf.LocalPath, "EZCT_PATH", "", false, false)
 	varenv.Add("user", &Conf.Auth.Username, "EZCT_GIT_USERNAME", "", false, false)
 	varenv.Add("token", &Conf.Auth.Token, "EZCT_GIT_TOKEN", "", false, false)
 	varenv.Add("committerName", &Conf.Committer.Name, "EZCT_COMMITTER_NAME", "ezctower", false, false)
@@ -70,7 +74,44 @@ func Setup() error {
 	if err != nil {
 		return err
 	}
+	// ----------------------------------- Handle path
+	if !filepath.IsAbs(Conf.Workdir) {
+		return fmt.Errorf("workdir (EZCT_WORKDIR) must be an absolute path")
+	}
+	Conf.RepoName, err = extractRepoName(Conf.RepoUrl)
+	if err != nil {
+		return err
+	}
+	Conf.RepoBasePath = filepath.Join(Conf.Workdir, Conf.RepoName)
+	if localPath != "" {
+		// Command line values override config file and env vars
+		Conf.LocalPath = localPath
+	}
+	if Conf.LocalPath == "" {
+		// We take the current working folder
+		cwd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("unable to locate current working directory: %w", err)
+		}
+		if len(cwd) < len(Conf.RepoBasePath) {
+			return fmt.Errorf("not inside git repo and EZCT_PATH is not defined")
+		}
+		Conf.LocalPath = cwd[len(Conf.RepoBasePath):]
+		if len(Conf.LocalPath) > 0 && Conf.LocalPath[0:1] == "/" {
+			Conf.LocalPath = Conf.LocalPath[1:]
+		}
+	}
 	return nil
+}
+
+// ExtractRepoName extract the repo name from the repo url
+func extractRepoName(s string) (string, error) {
+	u, err := url.Parse(s)
+	if err != nil {
+		return "", err
+	}
+	base := path.Base(u.Path)
+	return base[0 : len(base)-4], nil
 }
 
 func handleLog(logConfig *LogConfig, logLevel string, logMode string) (logr.Logger, error) {

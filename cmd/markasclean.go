@@ -31,15 +31,15 @@ func markAsClean() error {
 	if err != nil {
 		return err
 	}
-	absPath := gr.AbsPath(config.Conf.Path)
+	absPath := gr.AbsPath(config.Conf.LocalPath)
 	content := time.Now().String()
 	err = os.WriteFile(filepath.Join(absPath, config.Marker), []byte(content+"\n"), 0644)
 	if err != nil {
 		return err
 	}
-	err = gr.Add(filepath.Join(config.Conf.Path, config.Marker))
+	err = gr.Add(filepath.Join(config.Conf.LocalPath, config.Marker))
 	if err != nil {
-		return fmt.Errorf("error pn Add(%s): %w", filepath.Join(config.Conf.Path, config.Marker), err)
+		return fmt.Errorf("error pn Add(%s): %w", filepath.Join(config.Conf.LocalPath, config.Marker), err)
 	}
 	err = gr.Commit(fmt.Sprintf("Ecluster tower marker '%s'", content))
 	if err != nil {
