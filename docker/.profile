@@ -18,8 +18,8 @@ then
     # We are in interactive mode
     # Will clone the repo
     tower refresh --localPath "."
-    export BASE_DIR="$(tower location base)"
-    export REPO_NAME="$(tower location reponame)"
+    export BASE_DIR="$(tower location --localPath "." base)"
+    export REPO_NAME="$(tower location --localPath "." reponame)"
     if [ "$REPO_NAME" == "osiac" ]
     then
         pattern='iac/*/*'
@@ -43,7 +43,7 @@ then
           echo "Unable to locate $1"
         }
     fi
-    cd $(tower location base)
+    cd $(tower location --localPath "." base)
 else
     cd ${HOME}
 fi
